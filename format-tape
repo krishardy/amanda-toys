@@ -1,9 +1,17 @@
 #!/bin/bash
 
+######################
+# USER CONFIGURATION #
+######################
+
 SLOTS=/archive/vtapes/daily/slots
 SLOT_PREFIX=slot
 MOUNT_TAPES=/var/lib/amanda/bin/mount-tapes
 AMANDA_USER=amandabackup
+
+##########################
+# END USER CONFIGURATION #
+##########################
 
 usage() {
     echo "format-tape <label> <device> <slot #>"

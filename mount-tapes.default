@@ -1,21 +1,29 @@
 #!/bin/bash
 
-LABEL_PATH=/dev/disk/by-label
+######################
+# USER CONFIGURATION #
+######################
+
+DEV_LABEL_PATH=/dev/disk/by-label
 SLOTS_PATH=/archive/vtapes/daily/slots
 USER=amandabackup
 GROUP=disk
 
+##########################
+# END USER CONFIGURATION #
+##########################
+
 do_mount_by_label () {
-  if [ -e "$LABEL_PATH/$1" ]; then
+  if [ -e "$DEV_LABEL_PATH/$1" ]; then
     existing_mount=$(mount|grep "$SLOTS_PATH/$2")
     if [ "$existing_mount" != "" ]; then
       echo "Active mount detected: $existing_mount"
       echo "Continuing..."
       return
     fi
-    sudo mount -t ext3 $LABEL_PATH/$1 $SLOTS_PATH/$2
+    sudo mount -t ext3 $DEV_LABEL_PATH/$1 $SLOTS_PATH/$2
     if [ "$?" != "0" ]; then
-      echo "Failed while attempting to mount $LABEL_PATH/$1 to $SLOTS_PATH/$2"
+      echo "Failed while attempting to mount $DEV_LABEL_PATH/$1 to $SLOTS_PATH/$2"
       exit 1
     fi
     sudo chown $USER.$GROUP $SLOTS_PATH/$2
@@ -23,10 +31,11 @@ do_mount_by_label () {
       echo "Failed while attempting to chown $USER.$GROUP $SLOTS_PATH/$2"
       exit 2
     fi
-    echo "SUCCESS: Mounted $LABEL_PATH/$1 to $SLOTS_PATH/$2"
+    echo "SUCCESS: Mounted $DEV_LABEL_PATH/$1 to $SLOTS_PATH/$2"
   fi
 }
 
 #A line like the one below will be automatically added to this script by
 #format-tape:
 #do_mount_by_label "daily-001" "slot1"
+

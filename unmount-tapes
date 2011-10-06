@@ -1,6 +1,14 @@
 #!/bin/bash
 
+######################
+# USER CONFIGURATION #
+######################
+
 SLOTS_PATH=/archive/vtapes/daily/slots
+
+##########################
+# END USER CONFIGURATION #
+##########################
 
 for mount_point in `mount|grep "$SLOTS_PATH"|awk '{print $3}'`
 do

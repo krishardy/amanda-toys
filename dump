@@ -1,3 +1,14 @@
 #!/bin/bash
-amdump $1
-amcheckdump $1
+
+######################
+# USER CONFIGURATION #
+######################
+
+AMPATH=/usr/sbin
+
+##########################
+# END USER CONFIGURATION #
+##########################
+
+$AMPATH/amdump $1
+$AMPATH/amcheckdump $1
