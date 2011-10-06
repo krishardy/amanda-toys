@@ -1,0 +1,3 @@
+#!/bin/bash
+amdump $1
+amcheckdump $1

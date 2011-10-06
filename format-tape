@@ -1,0 +1,142 @@
+#!/bin/bash
+
+SLOTS=/archive/vtapes/daily/slots
+SLOT_PREFIX=slot
+MOUNT_TAPES=/var/lib/amanda/bin/mount-tapes
+AMANDA_USER=amandabackup
+
+usage() {
+    echo "format-tape <label> <device> <slot #>"
+    echo
+    echo "Example:"
+    echo "format-tape daily-001 /dev/sdc 1"
+}
+
+# Verify the parameters
+if [ "`whoami`" != "$AMANDA_USER" ]; then
+    echo "You must run this as user $AMANDA_USER.  Aborting."
+    exit 1
+fi
+
+if [ "$1" == "" ]; then
+    usage
+    exit 1
+fi
+
+if [ "$2" == "" ]; then
+    usage
+    exit 1
+fi
+
+if [ "$3" == "" ]; then
+    usage
+    exit 1
+fi
+
+# Do sanity checking on the device.  Absolute forbid any mounted device from being used!
+
+DEV=$(mount|grep $2|awk '{print $1}')
+if [ "$DEV" != "" ]; then
+    echo "Device $2 must be unmounted in order to keep you from trashing your"
+    echo "system.  Aborting."
+    exit 2
+fi
+
+echo "Starting fdisk so that you can create the partition..."
+echo "1) Type 'p' to ensure that the disk is not partitioned"
+echo "2) Then type 'n' to create a new partition, and use the defaults for the"
+echo "   partition settings"
+echo "3) When you are done, type 'w' to write the partition table to disk and exit"
+sudo fdisk $2
+if [ "$?" != "0" ]; then
+    echo "Partitioning of $2 failed.  Aborting."
+    exit 3
+fi
+
+PARTITION=$21
+
+echo "Preparing to format partition $PARTITION..."
+read -p "Continue? [Yn] " CONTINUE
+
+shopt -s nocasematch
+if [ "$CONTINUE" != "y" ]; then
+    exit 0
+fi
+shopt -u nocasematch
+
+sudo mkfs.ext3 -L $1 -m 1 -T largefile4 $PARTITION
+if [ "$?" != "0" ]; then
+    echo "Formatting partition $PARTITION failed"
+    exit 4
+fi
+
+echo "Fomatting is complete."
+echo ""
+echo "****************************************************************************"
+echo "Turn off the external drive sled, wait 10 seconds, and turn it back on."
+echo "****************************************************************************"
+read -p "Press any key to continue after the sled has been turned back on."
+
+echo "Waiting 10 seconds to resync the SATA devices..."
+sleep 10
+
+echo "Making directory $SLOTS/$SLOT_PREFIX$3"
+mkdir $SLOTS/$SLOT_PREFIX$3
+if [ "$?" != "0" ]; then
+    echo "mkdir $SLOTS/$SLOT_PREFIX$3 failed."
+    read -p "Continue and use $SLOTS/$SLOT_PREFIX$3 as the mount point anyway? [nY] " CONTINUE
+    shopt -s nocasematch
+    if [ "$CONTINUE" != "y" ]; then
+        exit 8
+    fi
+    shopt -u nocasematch
+fi
+
+echo "Attempting to mount the new partition..."
+sudo mount /dev/disk/by-label/$1 $SLOTS/$SLOT_PREFIX$3
+if [ "$?" != "0" ]; then
+    echo "Mounting partition $PARTITION to $SLOTS/$SLOT_PREFIX$3 failed.  Aborting."
+    exit 5
+fi
+
+sudo chown amandabackup.disk $SLOTS/$SLOT_PREFIX$3
+if [ "$?" != "0" ]; then
+    echo "$SLOTS/$3 could not be chowned to amandabackup.disk.  Aborting."
+    exit 6
+fi
+
+echo "Labeling the tape..."
+amlabel daily $1 slot $3
+if [ "$?" != "0" ]; then
+    echo "The tape $1 could not be labeled.  Aborting."
+    exit 7
+fi
+
+SCRIPT_COMMAND="do_mount_by_label \"$1\" \"$SLOT_PREFIX$3\""
+echo "Adding the following line to $MOUNT_TAPES:"
+echo $SCRIPT_COMMAND
+
+read -p "Press any key to automatically update $MOUNT_TAPES, or CTRL-C to abort"
+
+cp $MOUNT_TAPES $MOUNT_TAPES.bak
+if [ "$?" != "0" ]; then
+    echo "$MOUNT_TAPES could not be copied to $MOUNT_TAPES.bak.  Aborting."
+    exit 8
+fi
+
+echo $SCRIPT_COMMAND >> $MOUNT_TAPES
+if [ "$?" != "0" ]; then
+    echo "$SCRIPT_COMMAND could not be appended to $MOUNT_TAPES.  Aborting."
+    echo 9
+fi
+
+echo "Testing mount-tapes..."
+
+$MOUNT_TAPES
+
+echo "Done!  Please check to make sure that the tape $1 mounted properly to"
+echo "$SLOTS/$SLOT_PREFIX$3"
+
+echo "If you need to swap tapes out, run 'unmount-tapes', swap the tape, and then"
+echo "run 'mount-tapes'"
+

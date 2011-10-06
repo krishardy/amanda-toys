@@ -1,0 +1,26 @@
+#!/bin/bash
+
+SLOTS_PATH=/archive/vtapes/daily/slots
+
+for mount_point in `mount|grep "$SLOTS_PATH"|awk '{print $3}'`
+do
+  if [ "$mount_point" != "" ]; then
+    echo "Attempting to unmount $mount_point"
+    sudo umount "$mount_point"
+    if [ "$?" != "0" ]; then
+      echo "WARNING! $mount_point could not be unmounted!"
+      echo "Please check the mount point for activity."
+      echo "(lsof $mount_point)"
+    fi
+  fi
+done
+
+echo 
+echo "Current mounts in $SLOTS_PATH:"
+echo "==============================================================="
+mount|grep "$SLOTS_PATH"
+
+echo "==============================================================="
+echo 
+echo "If no mount points are listed for $SLOTS_PATH, you may safely"
+echo "eject the drive."

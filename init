@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ ! -e "mount-tapes" ]; then
+  cp mount-tapes.default mount-tapes
+else
+  echo "mount-tapes already exists.  Skipping."
+fi
