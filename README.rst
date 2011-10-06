@@ -15,6 +15,11 @@ Get amanda-toys by cloning the repository: ::
 
 Then add the path to your local repository to your PATH, or reference the scripts using absolute paths.
 
+To initalize the toys (which creates a clean mount-tapes script for you): ::
+
+    $ cd amanda-toys
+    $ ./init
+
 
 Configuration
 -------------
