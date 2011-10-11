@@ -11,4 +11,10 @@ AMPATH=/usr/sbin
 ##########################
 
 $AMPATH/amdump $1
+
+if [ "$?" != "0" ]; then
+  echo "amdump failed.  Aborting."
+  exit
+fi
+
 $AMPATH/amcheckdump $1
