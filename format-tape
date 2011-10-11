@@ -81,12 +81,15 @@ fi
 echo "Fomatting is complete."
 echo ""
 echo "****************************************************************************"
-echo "Turn off the external drive sled, wait 10 seconds, and turn it back on."
-echo "****************************************************************************"
-read -p "Press any key to continue after the sled has been turned back on."
+read -p "Turn off the external drive sled and then press any key to continue."
+echo "Waiting for 15 seconds for the device bus to disconnect the drive..."
+sleep 15
 
-echo "Waiting 10 seconds to resync the SATA devices..."
-sleep 10
+echo
+echo "****************************************************************************"
+read -p "Turn the sled back on, and then press any key to continue."
+echo "Waiting for 15 seconds to resync the SATA devices..."
+sleep 15
 
 echo "Making directory $SLOTS/$SLOT_PREFIX$3"
 mkdir $SLOTS/$SLOT_PREFIX$3
