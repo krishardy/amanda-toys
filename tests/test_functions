@@ -1,0 +1,20 @@
+#!/bin/bash
+
+source ../etc/functions
+
+result=$(pause "Checking Default: Press enter (should default to Y) " "Y" "Y")
+assert_equal "$result" "0" "Assertion Failed"
+
+result=$(pause "Checking Perfect Match: Press Y " "n" "Y")
+assert_equal "$result" "0" "Assertion Failed"
+
+result=$(pause "Checking Case Insensitive Match: Press y " "n" "Y")
+assert_equal "$result" "0" "Assertion Failed"
+
+result=$(pause "Checking default!=success: Press enter (should return 1) " "Y" "n")
+assert_equal "$result" "1" "Assertion Failed"
+
+result=$(pause "Checking failure: Press n (should return 1) " "Y" "Y")
+assert_equal "$result" "1" "Assertion Failed"
+
+

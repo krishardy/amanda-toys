@@ -1,0 +1,29 @@
+pause() {
+    # echos 0 in success, 1 on failure
+    # $1 Prompt
+    # $2 Default
+    # $3 Success Value
+
+    read -p "$1" VAL
+
+    [ "$VAL" == "" ] && VAL=$2
+
+    shopt -s nocasematch
+    if [[ "$VAL" = "$3" ]]; then
+        echo "0"
+    else
+        echo "1"
+    fi
+    shopt -u nocasematch
+}
+
+pause_and_assert() {
+    assert_equal $(pause $1 $2 $3) "0" "Exiting."
+}
+
+assert_equal() {
+    if [ "$1" != "$2" ]; then
+        echo $3
+        exit 255
+    fi
+}
