@@ -10,6 +10,27 @@ AMPATH=/usr/sbin
 # END USER CONFIGURATION #
 ##########################
 
+# Determine path of this script
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+# Sanity-check the server
+$AMPATH/amcheck -l $1
+
+if [ "$?" != "0" ]; then
+  echo "amcheck indicated that the server is not ready."
+  echo "This may be due to a dump in progress or a tape error.  Aborting."
+  exit
+fi
+
+# If a predump script exists and is executable, execute it
+if [ -x $DIR/custom/$1_predump ]; then
+  echo "Predump script detected: $1_predump.  Launching."
+  $DIR/custom/$1_predump
+  if [ "$?" != "0" ]; then
+    echo "Predump script did not return 0.  Aborting"
+  fi
+fi
+
 $AMPATH/amdump $1
 
 if [ "$?" != "0" ]; then
