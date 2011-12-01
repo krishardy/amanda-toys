@@ -34,8 +34,7 @@ fi
 $AMPATH/amdump $1
 
 if [ "$?" != "0" ]; then
-  echo "amdump failed.  Aborting."
-  exit
+  echo "amdump failed."
 fi
 
 $AMPATH/amcheckdump $1
