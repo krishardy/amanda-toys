@@ -80,7 +80,7 @@ echo "# and put in an new, unpartitioned drive.  Then rerun $0               #"
 echo "########################################################################"
 echo
 
-pause_and_assert "Continue? (The drive WILL be erased if choose 'y') [Ny] " "N", "Y" 
+pause_and_assert "Continue? (The drive WILL be erased if choose 'y') [Ny] " "N" "Y" 
 
 # Partition the drive
 
