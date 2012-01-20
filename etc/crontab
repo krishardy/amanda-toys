@@ -1,0 +1,2 @@
+0 14 * * * /var/lib/amanda/bin/check daily
+0 22 * * * /var/lib/amanda/bin/dump daily
