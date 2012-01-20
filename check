@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+######################
+# USER CONFIGURATION #
+######################
+
+AMPATH=/usr/sbin
+
+##########################
+# END USER CONFIGURATION #
+##########################
+
+# Determine path of this script
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+# Sanity-check the server
+$AMPATH/amcheck -m -l $1
+
+if [ "$?" != "0" ]; then
+  echo "amcheck indicated that the server is not ready."
+  echo "This may be due to a dump in progress or a tape error.  Aborting."
+  exit
+fi
+
+# Do a full check
+$AMPATH/amcheck -a $1
