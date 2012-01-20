@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ######################
 # USER CONFIGURATION #
@@ -35,6 +35,7 @@ $AMPATH/amdump $1
 
 if [ "$?" != "0" ]; then
   echo "amdump failed."
+  exit
 fi
 
 $AMPATH/amcheckdump $1
