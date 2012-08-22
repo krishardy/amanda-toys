@@ -4,9 +4,9 @@
 # USER CONFIGURATION #
 ######################
 
-SLOTS=/archive/vtapes/daily/slots
+SLOTS=/var/archive/vtapes/daily/slots
 SLOT_PREFIX=slot
-MOUNT_TAPES=/var/lib/amanda/bin/mount-tapes
+MOUNT_TAPES_CSTM=/var/lib/amanda/bin/custom/mount-tapes
 AMANDA_USER=amandabackup
 
 ##########################

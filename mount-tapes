@@ -5,7 +5,8 @@
 ######################
 
 DEV_LABEL_PATH=/dev/disk/by-label
-SLOTS_PATH=/archive/vtapes/daily/slots
+SLOTS_PATH=/var/archive/vtapes/daily/slots
+TAPE_LIST=/var/lib/amanda/bin/custom/mount.tapes
 USER=amandabackup
 GROUP=disk
 
@@ -35,7 +36,4 @@ do_mount_by_label () {
   fi
 }
 
-#A line like the one below will be automatically added to this script by
-#format-tape:
-#do_mount_by_label "daily-001" "slot1"
-
+source $TAPE_LIST
