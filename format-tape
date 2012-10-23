@@ -7,7 +7,9 @@
 SLOTS=/var/archive/vtapes/daily/slots
 SLOT_PREFIX=slot
 MOUNT_TAPES_CSTM=/var/lib/amanda/bin/custom/mount-tapes
+BIN_ETC_CSTM=/var/lib/amanda/bin/etc
 AMANDA_USER=amandabackup
+FDISK=/sbin/fdisk
 
 ##########################
 # END USER CONFIGURATION #
@@ -32,8 +34,8 @@ usage() {
     exit 1
 }
 
-source etc/functions
 #provides pause, pause_and_assert, assert_equal
+source $BIN_ETC_CSTM/functions
 
 # Verify the parameters
 if [ "`whoami`" != "$AMANDA_USER" ]; then
@@ -66,17 +68,18 @@ if [ "$DEV" != "" ]; then
 fi
 
 echo "########################################################################"
-echo "# Listing the partition table for $2 to see if the drive is            #"
-echo "# already partitioned.                                                 #"
+echo "# Listing the partition table for $2 to see if the drive is"
+echo "# already partitioned."
 echo "########################################################################"
 echo
 
-fdisk -l $2
+$FDISK -l $2
 
 echo
 echo "########################################################################"
-echo "# If any partitions are listed above, answer 'N' on the line below,    #"
-echo "# and put in an new, unpartitioned drive.  Then rerun $0               #"
+echo "# If any partitions are listed above, answer 'N' on the line below,"
+echo "# and put in an new, unpartitioned drive.  Then rerun"
+echo "# $0"
 echo "########################################################################"
 echo
 
@@ -88,7 +91,7 @@ echo
 echo "Partitioning the drive..."
 echo
 
-sudo fdisk $2 << EOF
+sudo $FDISK $2 << EOF
 n
 p
 1

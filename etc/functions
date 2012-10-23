@@ -10,15 +10,17 @@ pause() {
 
     shopt -s nocasematch
     if [[ "$VAL" = "$3" ]]; then
-        echo "0"
+        return 0
     else
-        echo "1"
+        return 1
     fi
     shopt -u nocasematch
 }
 
 pause_and_assert() {
-    assert_equal $(pause $1 $2 $3) "0" "Exiting."
+    pause "$1" "$2" "$3"
+    result=$?
+    assert_equal $result "0" "Exiting."
 }
 
 assert_equal() {
