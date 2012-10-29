@@ -6,7 +6,8 @@
 
 SLOTS=/var/archive/vtapes/daily/slots
 SLOT_PREFIX=slot
-MOUNT_TAPES_CSTM=/var/lib/amanda/bin/custom/mount-tapes
+MOUNT_TAPES=/var/lib/amanda/bin/mount-tapes
+MOUNT_TAPES_CSTM=/var/lib/amanda/bin/custom/mount.tapes
 BIN_ETC_CSTM=/var/lib/amanda/bin/etc
 AMANDA_USER=amandabackup
 FDISK=/sbin/fdisk
@@ -58,7 +59,7 @@ if [ "$3" == "" ]; then
     exit 1
 fi
 
-# Do sanity checking on the device.  Absolute forbid any mounted device from being used!
+# Do sanity checking on the device.  Absolutely forbid any mounted device from being used!
 
 DEV=$(mount|grep $2|awk '{print $1}')
 if [ "$DEV" != "" ]; then
@@ -161,25 +162,29 @@ fi
 echo "Labeling the tape..."
 amlabel daily $1 slot $3
 if [ "$?" != "0" ]; then
-    echo "The tape $1 could not be labeled.  Aborting."
+    echo "The tape $1 could not be labeled. Unmounting $PARTITION and aborting."
+    umount $PARTITION
+    echo "If the label $1 is correct, remove the label from"
+    echo "/etc/amanda/daily/tapelist"
+    echo "and try again."
     exit 7
 fi
 
 SCRIPT_COMMAND="do_mount_by_label \"$1\" \"$SLOT_PREFIX$3\""
-echo "Preparing to add the following line to $MOUNT_TAPES:"
+echo "Preparing to add the following line to $MOUNT_TAPES_CSTM:"
 echo $SCRIPT_COMMAND
 
 pause_and_assert "Continue? [Yn]" "Y" "Y"
 
-cp $MOUNT_TAPES $MOUNT_TAPES.bak
+cp $MOUNT_TAPES_CSTM $MOUNT_TAPES_CSTM.bak
 if [ "$?" != "0" ]; then
-    echo "$MOUNT_TAPES could not be copied to $MOUNT_TAPES.bak.  Aborting."
+    echo "$MOUNT_TAPES_CSTM could not be copied to $MOUNT_TAPES_CSTM.bak.  Aborting."
     exit 8
 fi
 
-echo $SCRIPT_COMMAND >> $MOUNT_TAPES
+echo $SCRIPT_COMMAND >> $MOUNT_TAPES_CSTM
 if [ "$?" != "0" ]; then
-    echo "$SCRIPT_COMMAND could not be appended to $MOUNT_TAPES.  Aborting."
+    echo "$SCRIPT_COMMAND could not be appended to $MOUNT_TAPES_CSTM.  Aborting."
     echo 9
 fi
 
