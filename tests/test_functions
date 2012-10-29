@@ -2,19 +2,22 @@
 
 source ../etc/functions
 
-result=$(pause "Checking Default: Press enter (should default to Y) " "Y" "Y")
-assert_equal "$result" "0" "Assertion Failed"
+pause "Checking Default: Press enter (should default to Y) " "Y" "Y"
+assert_equal "$?" "0" "Assertion Failed"
 
-result=$(pause "Checking Perfect Match: Press Y " "n" "Y")
-assert_equal "$result" "0" "Assertion Failed"
+pause "Checking Perfect Match: Press Y " "n" "Y"
+assert_equal "$?" "0" "Assertion Failed"
 
-result=$(pause "Checking Case Insensitive Match: Press y " "n" "Y")
-assert_equal "$result" "0" "Assertion Failed"
+pause "Checking Case Insensitive Match: Press y " "n" "Y"
+assert_equal "$?" "0" "Assertion Failed"
 
-result=$(pause "Checking default!=success: Press enter (should return 1) " "Y" "n")
-assert_equal "$result" "1" "Assertion Failed"
+pause "Checking default!=success: Press enter (should return 1) " "Y" "n"
+assert_equal "$?" "1" "Assertion Failed"
 
-result=$(pause "Checking failure: Press n (should return 1) " "Y" "Y")
-assert_equal "$result" "1" "Assertion Failed"
+pause "Checking failure: Press n (should return 1) " "Y" "Y"
+assert_equal "$?" "1" "Assertion Failed"
 
+pause_and_assert "Checking pause_and_assert: Press enter " "Y" "Y"
+echo "pause_and_assert passed."
 
+echo "All Tests Passed."
