@@ -1,1 +1,0 @@
-* When dump is run, have it execute custom scripts in dump.d/.  This will be useful for scripts to handle the dumping of running services (mysql, postgres, openldap, etc)
