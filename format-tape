@@ -4,7 +4,6 @@
 # USER CONFIGURATION #
 ######################
 
-SLOTS=/var/archive/vtapes/daily/slots
 SLOT_PREFIX=slot
 MOUNT_TAPES=/var/lib/amanda/bin/mount-tapes
 MOUNT_TAPES_CSTM=/var/lib/amanda/bin/custom/mount.tapes
@@ -28,10 +27,10 @@ FDISK=/sbin/fdisk
 ##########################
 
 usage() {
-    echo "format-tape <label> <device> <slot #>"
+    echo "format-tape <conf> <label> <device> <slot #>"
     echo
     echo "Example:"
-    echo "format-tape daily-001 /dev/sdc 1"
+    echo "format-tape daily daily-001 /dev/sdc 1"
     exit 1
 }
 
@@ -59,22 +58,29 @@ if [ "$3" == "" ]; then
     exit 1
 fi
 
+if [ "$4" == "" ]; then
+    usage
+    exit 1
+fi
+
+SLOTS=/var/archive/vtapes/$1/slots
+
 # Do sanity checking on the device.  Absolutely forbid any mounted device from being used!
 
-DEV=$(mount|grep $2|awk '{print $1}')
+DEV=$(mount|grep $3|awk '{print $2}')
 if [ "$DEV" != "" ]; then
-    echo "Device $2 must be unmounted in order to keep you from trashing your"
+    echo "Device $3 must be unmounted in order to keep you from trashing your"
     echo "system.  Aborting."
     exit 2
 fi
 
 echo "########################################################################"
-echo "# Listing the partition table for $2 to see if the drive is"
+echo "# Listing the partition table for $3 to see if the drive is"
 echo "# already partitioned."
 echo "########################################################################"
 echo
 
-$FDISK -l $2
+$FDISK -l $3
 
 echo
 echo "########################################################################"
@@ -92,7 +98,7 @@ echo
 echo "Partitioning the drive..."
 echo
 
-sudo $FDISK $2 << EOF
+sudo $FDISK $3 << EOF
 n
 p
 1
@@ -102,17 +108,17 @@ w
 EOF
 
 if [ "$?" != "0" ]; then
-    echo "Partitioning of $2 failed.  Aborting."
+    echo "Partitioning of $3 failed.  Aborting."
     exit 3
 fi
 
-PARTITION=$21
+PARTITION=$31
 
 echo
 echo "Preparing to format partition $PARTITION..."
 pause_and_assert "Continue? [Yn] " "Y" "Y"
 
-sudo mkfs.ext3 -L $1 -m 1 -T largefile4 $PARTITION
+sudo mkfs.ext3 -L $2 -m 1 -T largefile4 $PARTITION
 if [ "$?" != "0" ]; then
     echo "Formatting partition $PARTITION failed"
     exit 4
@@ -139,38 +145,41 @@ echo
 echo "Waiting for 15 seconds to resync the SATA devices..."
 sleep 15
 
-echo "Making directory $SLOTS/$SLOT_PREFIX$3"
-mkdir $SLOTS/$SLOT_PREFIX$3
+echo "Making directory $SLOTS/$SLOT_PREFIX$4"
+mkdir $SLOTS/$SLOT_PREFIX$4
 if [ "$?" != "0" ]; then
-    echo "mkdir $SLOTS/$SLOT_PREFIX$3 failed."
-    pause_and_assert "Continue and use $SLOTS/$SLOT_PREFIX$3 as the mount point anyway? [Yn] " "Y" "Y"
+    echo "mkdir $SLOTS/$SLOT_PREFIX$4 failed."
+    pause_and_assert "Continue and use $SLOTS/$SLOT_PREFIX$4 as the mount point anyway? [Yn] " "Y" "Y"
 fi
 
 echo "Attempting to mount the new partition..."
-sudo mount /dev/disk/by-label/$1 $SLOTS/$SLOT_PREFIX$3
+sudo mount /dev/disk/by-label/$2 $SLOTS/$SLOT_PREFIX$4
 if [ "$?" != "0" ]; then
-    echo "Mounting partition $PARTITION to $SLOTS/$SLOT_PREFIX$3 failed.  Aborting."
+    echo "Mounting partition $PARTITION to $SLOTS/$SLOT_PREFIX$4 failed.  Aborting."
     exit 5
 fi
 
-sudo chown amandabackup:disk $SLOTS/$SLOT_PREFIX$3
+sudo chown amandabackup:disk $SLOTS/$SLOT_PREFIX$4
 if [ "$?" != "0" ]; then
-    echo "$SLOTS/$3 could not be chowned to amandabackup.disk.  Aborting."
+    echo "$SLOTS/$4 could not be chowned to amandabackup.disk.  Aborting."
     exit 6
 fi
 
 echo "Labeling the tape..."
-amlabel daily $1 slot $3
+amlabel $1 $2 slot $4
 if [ "$?" != "0" ]; then
-    echo "The tape $1 could not be labeled. Unmounting $PARTITION and aborting."
-    umount $PARTITION
-    echo "If the label $1 is correct, remove the label from"
-    echo "/etc/amanda/daily/tapelist"
+    echo "The tape $2 could not be labeled. Unmounting $PARTITION and aborting."
+    sudo umount $PARTITION
+    echo
+    echo "*** Check the 'tapecycle' parameter in amanda.conf. ***"
+    echo
+    echo "If the label $2 is correct, remove the label from"
+    echo "/etc/amanda/$1/tapelist"
     echo "and try again."
     exit 7
 fi
 
-SCRIPT_COMMAND="do_mount_by_label \"$1\" \"$SLOT_PREFIX$3\""
+SCRIPT_COMMAND="do_mount_by_label \"$2\" \"$SLOT_PREFIX$4\""
 echo "Preparing to add the following line to $MOUNT_TAPES_CSTM:"
 echo $SCRIPT_COMMAND
 
