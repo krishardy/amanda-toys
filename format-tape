@@ -5,10 +5,10 @@
 ######################
 
 SLOT_PREFIX=slot
-MOUNT_TAPES=/var/lib/amanda/bin/mount-tapes
-MOUNT_TAPES_CSTM=/var/lib/amanda/bin/custom/mount.tapes
-BIN_ETC_CSTM=/var/lib/amanda/bin/etc
-AMANDA_USER=amandabackup
+MOUNT_TAPES=/var/backups/bin/mount-tapes
+MOUNT_TAPES_CSTM=/var/backups/bin/custom/mount.tapes
+BIN_ETC_CSTM=/var/backups/bin/etc
+AMANDA_USER=backup
 FDISK=/sbin/fdisk
 
 ##########################

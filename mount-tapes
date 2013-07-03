@@ -6,13 +6,17 @@
 
 DEV_LABEL_PATH=/dev/disk/by-label
 SLOTS_PATH=/var/archive/vtapes/daily/slots
-TAPE_LIST=/var/lib/amanda/bin/custom/mount.tapes
-USER=amandabackup
+TAPE_LIST=/var/backups/bin/custom/mount.tapes
+BIN_ETC_CSTM=/var/backups/bin/etc
+USER=backup
 GROUP=disk
 
 ##########################
 # END USER CONFIGURATION #
 ##########################
+
+#provides pause, pause_and_assert, assert_equal
+source $BIN_ETC_CSTM/functions
 
 do_mount_by_label () {
   if [ -e "$DEV_LABEL_PATH/$1" ]; then
@@ -27,10 +31,21 @@ do_mount_by_label () {
       echo "Failed while attempting to mount $DEV_LABEL_PATH/$1 to $SLOTS_PATH/$2"
       exit 1
     fi
-    sudo chown $USER.$GROUP $SLOTS_PATH/$2
+    sudo chown $USER:$GROUP $SLOTS_PATH/$2
     if [ "$?" != "0" ]; then
       echo "Failed while attempting to chown $USER.$GROUP $SLOTS_PATH/$2"
       exit 2
+    fi
+    echo "Listing contents of $SLOTS_PATH/$2"
+    ls -al $SLOTS_PATH/$2
+    pause "Should ownership of this tape be changed to $USER:$GROUP? [YN]" "N" "Y"
+    RESULT=$?
+    if [ "$RESULT" == "0" ]; then
+        sudo chown -R $USER:$GROUP $SLOTS_PATH/$2
+        if [ "$?" != "0" ]; then
+            echo "Failed while attempting to chown -R $USER:$GROUP $SLOTS_PATH/$2"
+            exit 3
+        fi
     fi
     echo "SUCCESS: Mounted $DEV_LABEL_PATH/$1 to $SLOTS_PATH/$2"
   fi
