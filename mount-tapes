@@ -4,6 +4,7 @@
 # USER CONFIGURATION #
 ######################
 
+BACKUP_NAME=daily
 DEV_LABEL_PATH=/dev/disk/by-label
 SLOTS_PATH=/var/archive/vtapes/daily/slots
 TAPE_LIST=/var/backups/bin/custom/mount.tapes
@@ -48,6 +49,9 @@ do_mount_by_label () {
         fi
     fi
     echo "SUCCESS: Mounted $DEV_LABEL_PATH/$1 to $SLOTS_PATH/$2"
+
+    echo "Running amcheck -s $BACKUP_NAME"
+    amcheck -s $BACKUP_NAME
   fi
 }
 
