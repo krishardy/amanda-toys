@@ -11,6 +11,7 @@ TAPE_LIST=/var/backups/bin/custom/mount.tapes
 BIN_ETC_CSTM=/var/backups/bin/etc
 USER=backup
 GROUP=disk
+AMCHECK=/usr/sbin/amcheck
 
 ##########################
 # END USER CONFIGURATION #
@@ -51,7 +52,7 @@ do_mount_by_label () {
     echo "SUCCESS: Mounted $DEV_LABEL_PATH/$1 to $SLOTS_PATH/$2"
 
     echo "Running amcheck -s $BACKUP_NAME"
-    amcheck -s $BACKUP_NAME
+    $AMCHECK -s $BACKUP_NAME
   fi
 }
 
