@@ -40,7 +40,7 @@ do_mount_by_label () {
     fi
     echo "Listing contents of $SLOTS_PATH/$2"
     ls -al $SLOTS_PATH/$2
-    pause "Should ownership of this tape be changed to $USER:$GROUP? [YN]" "N" "Y"
+    pause "Should ownership of this tape be changed to $USER:$GROUP? [yN]" "N" "Y"
     RESULT=$?
     if [ "$RESULT" == "0" ]; then
         sudo chown -R $USER:$GROUP $SLOTS_PATH/$2
